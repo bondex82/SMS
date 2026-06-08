@@ -1,0 +1,89 @@
+32:    return (parseFloat(clean) / 100) * maxVal;
+138:  return (totalScore / subjects.length).toFixed(2) + "%";
+157:  return (totalScoreSum / totalSubjectCount).toFixed(2) + "%";
+436:    return () => clearTimeout(timer);
+483:    return () => clearTimeout(timer);
+566:    return (localStorage.getItem('gja_ca_mode') as '2-ca' | '3-ca') || '2-ca';
+857:    return () => clearTimeout(timer);
+1540:    return () => clearInterval(intervalId);
+2040:    return (
+2235:                    return (
+2355:                    return (
+2550:                return (
+2585:                return (
+2606:            return (
+3020:    return () => clearInterval(timer);
+3216:  return (
+4105:                      return (
+4120:                                  return (
+4508:                          return (
+4590:                                          return (
+4599:                                                  return (
+4605:                                                          return (
+4629:                                                  return (
+4635:                                                          return (
+4794:                                          return (
+5811:                                    return (
+5988:                                      return (
+6091:                                return (
+6296:                                      return (
+6853:                                return (
+6908:                                    return (
+7197:                                return (
+7279:                                      return (
+7616:                                  return (
+8092:                                      return (
+8551:                                      return (
+8802:                                  return (
+9560:                            return (
+9571:                          return (
+9724:                                  return (
+9766:                                                  return (
+9785:                                                  return (
+9804:                                                  return (
+9871:                                                return (
+10080:                                  return (
+10118:                                  return (
+10137:                                return (
+10244:                                          return (
+10287:                          return (
+10520:                                          return (
+10527:                                                return (
+10551:                                            return (
+10577:                            return (
+10584:                          return (
+10790:                                    return (
+10846:                                                return (
+10959:                                        return (
+10973:                                        return (
+10989:                                                  return (
+10995:                                                  return (
+11001:                                                  return (
+11191:                                  return (
+11248:                              return (
+11306:                                      return (
+11376:                                                return (
+11500:                          return (
+11542:                                    return (
+11549:                                          return (
+11573:                                      return (
+12258:                                        return (
+12368:                                    return (
+12387:                                  return (
+12579:                                          return (
+12590:                                          return (
+12866:                                                return (
+12971:                                return (
+13060:                                            return (
+13086:                                            return (
+13321:                                    return (
+13403:                                          return (
+13936:              return (
+14014:            return (
+14092:                          return (
+14227:                return (
+14243:                return (
+14283:        return (
+14374:        return (
+14399:              return (
+14469:                            return (

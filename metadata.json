@@ -1,0 +1,6 @@
+{
+  "name": "Grace Junior Academy",
+  "description": "The official website for Grace Junior Academy hosting news, admissions portal, academic curriculum, gallery, and contact resources.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
