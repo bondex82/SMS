@@ -621,6 +621,16 @@ export default function HomeSection({ setActiveTab }: HomeSectionProps) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Dynamic list compiled from classesDb and actual student grades to ensure uploaded classes propagate immediately
+  const finalClassesList = (() => {
+    const studentClasses = studentsDb.map(s => s.grade).filter(Boolean);
+    const combined = Array.from(new Set([...classesDb, ...studentClasses]));
+    if (combined.length > 0) {
+      return combined.sort();
+    }
+    return ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Nursery", "Pre-Kindergarten", "Kindergarten"];
+  })();
+
   // Curriculum Global Subjects state list
   const [subjectsDb, setSubjectsDb] = useState<string[]>(() => {
     const saved = localStorage.getItem('gja_global_subjects_db');
@@ -1560,15 +1570,16 @@ export default function HomeSection({ setActiveTab }: HomeSectionProps) {
   };
 
   const [trackerSelectedTerm, setTrackerSelectedTerm] = useState<'1st Term' | '2nd Term' | '3rd Term'>('3rd Term');
+  const [trackerSelectedClass, setTrackerSelectedClass] = useState('All Classes');
   
   // Broadsheet Generator state
-  const [broadsheetSelectedClass, setBroadsheetSelectedClass] = useState('Grade 1');
+  const [broadsheetSelectedClass, setBroadsheetSelectedClass] = useState(() => finalClassesList[0] || 'Grade 1');
   const [broadsheetSelectedTerm, setBroadsheetSelectedTerm] = useState<'1st Term' | '2nd Term' | '3rd Term'>('3rd Term');
 
   // Scoresheet Generator state
   const [scoresheetSelectedTeacherId, setScoresheetSelectedTeacherId] = useState(() => teachersDb.length > 0 ? teachersDb[0].id : 'teach-1');
   const [scoresheetSelectedTerm, setScoresheetSelectedTerm] = useState<'1st Term' | '2nd Term' | '3rd Term'>('1st Term');
-  const [scoresheetSelectedClass, setScoresheetSelectedClass] = useState(() => classesDb.length > 0 ? classesDb[0] : 'Grade 1');
+  const [scoresheetSelectedClass, setScoresheetSelectedClass] = useState(() => finalClassesList.length > 0 ? finalClassesList[0] : 'Grade 1');
   const printAsBlankScoresheet = true;
   const [activePrintLayout, setActivePrintLayout] = useState<'report-card' | 'broadsheet' | 'scratch-cards' | 'audit-report' | 'invoice' | 'scoresheet' | 'session-leaders' | 'admission-offer' | 'admission-profile' | null>(null);
   const [offerToPrint, setOfferToPrint] = useState<any>(null);
@@ -2203,21 +2214,27 @@ export default function HomeSection({ setActiveTab }: HomeSectionProps) {
 
   // Automatically keep all related class selection states in perfect sync if classes change or are deleted
   useEffect(() => {
-    if (classesDb.length > 0) {
-      if (!classesDb.includes(newStudentClass)) {
-        setNewStudentClass(classesDb[0]);
+    if (finalClassesList.length > 0) {
+      if (!finalClassesList.includes(newStudentClass)) {
+        setNewStudentClass(finalClassesList[0]);
       }
-      if (!classesDb.includes(ledgerSelectedClass)) {
-        setLedgerSelectedClass(classesDb[0]);
+      if (!finalClassesList.includes(ledgerSelectedClass)) {
+        setLedgerSelectedClass(finalClassesList[0]);
       }
-      if (!classesDb.includes(teacherEditingClass)) {
-        setTeacherEditingClass(classesDb[0]);
+      if (!finalClassesList.includes(teacherEditingClass)) {
+        setTeacherEditingClass(finalClassesList[0]);
       }
-      if (!classesDb.includes(activeSubjectConfigClass)) {
-        setActiveSubjectConfigClass(classesDb[0]);
+      if (!finalClassesList.includes(activeSubjectConfigClass)) {
+        setActiveSubjectConfigClass(finalClassesList[0]);
+      }
+      if (!finalClassesList.includes(broadsheetSelectedClass)) {
+        setBroadsheetSelectedClass(finalClassesList[0]);
+      }
+      if (!finalClassesList.includes(scoresheetSelectedClass)) {
+        setScoresheetSelectedClass(finalClassesList[0]);
       }
     }
-  }, [classesDb, newStudentClass, ledgerSelectedClass, teacherEditingClass, activeSubjectConfigClass]);
+  }, [finalClassesList, newStudentClass, ledgerSelectedClass, teacherEditingClass, activeSubjectConfigClass, broadsheetSelectedClass, scoresheetSelectedClass]);
 
   // 1. Student Portal State Variables
   const [studentIdSearch, setStudentIdSearch] = useState('');
@@ -10817,7 +10834,7 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
                                     onChange={(e) => setBroadsheetSelectedClass(e.target.value)}
                                     className="bg-white border border-slate-250 rounded-xl py-2 px-3 focus:outline-none text-xs font-black text-slate-900"
                                   >
-                                    {classesDb.map(c => (
+                                    {finalClassesList.map(c => (
                                       <option key={c} value={c}>{c}</option>
                                     ))}
                                   </select>
@@ -11719,25 +11736,44 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
                                 </p>
                               </div>
                               
-                              {/* Term Selector Toggles */}
-                              <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start md:self-auto">
-                                {(['1st Term', '2nd Term', '3rd Term'] as const).map((term) => {
-                                  const isActive = trackerSelectedTerm === term;
-                                  return (
-                                    <button
-                                      key={term}
-                                      type="button"
-                                      onClick={() => setTrackerSelectedTerm(term)}
-                                      className={`px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer ${
-                                        isActive
-                                          ? 'bg-purple-600 text-white shadow-xs font-black'
-                                          : 'text-slate-500 hover:text-slate-800'
-                                      }`}
-                                    >
-                                      {term}
-                                    </button>
-                                  );
-                                })}
+                              {/* Class Filter & Term Selector Toggles */}
+                              <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Filter by Class</label>
+                                  <select 
+                                    value={trackerSelectedClass}
+                                    onChange={(e) => setTrackerSelectedClass(e.target.value)}
+                                    className="bg-slate-100 border border-slate-250 rounded-xl py-2 px-3 focus:outline-none text-xs font-extrabold text-slate-800"
+                                  >
+                                    <option value="All Classes">All Classes</option>
+                                    {finalClassesList.map(c => (
+                                      <option key={c} value={c}>{c}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Selected Term</label>
+                                  <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-250 h-[36px]">
+                                    {(['1st Term', '2nd Term', '3rd Term'] as const).map((term) => {
+                                      const isActive = trackerSelectedTerm === term;
+                                      return (
+                                        <button
+                                          key={term}
+                                          type="button"
+                                          onClick={() => setTrackerSelectedTerm(term)}
+                                          className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                                            isActive
+                                              ? 'bg-purple-600 text-white shadow-xs'
+                                              : 'text-slate-500 hover:text-slate-800'
+                                          }`}
+                                        >
+                                          {term.split(' ')[0]}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             </div>
 
@@ -11749,8 +11785,21 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
                               let pendingCount = 0;
                               let noStudentsCount = 0;
 
-                              classesDb.forEach(c => {
-                                const subjects = classSubjectsDb[c] || [];
+                              const classesToTrack = trackerSelectedClass === 'All Classes' 
+                                ? finalClassesList 
+                                : [trackerSelectedClass];
+
+                              classesToTrack.forEach(c => {
+                                const subjects = (classSubjectsDb[c] && classSubjectsDb[c].length > 0)
+                                  ? classSubjectsDb[c]
+                                  : (() => {
+                                      const stds = studentsDb.filter(s => s.grade === c);
+                                      const uploadedSubjects = Array.from(new Set(stds.flatMap(s => {
+                                        const termData = s.termResults?.[trackerSelectedTerm];
+                                        return (termData?.subjects || []).map((sub: any) => sub.name);
+                                      })));
+                                      return uploadedSubjects.length > 0 ? uploadedSubjects : subjectsDb;
+                                    })();
                                 const classStudents = studentsDb.filter(s => s.grade === c);
                                 
                                 subjects.forEach(subj => {
@@ -11796,7 +11845,7 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
 
                                     {/* Uploaded Count */}
                                     <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs flex items-center space-x-4">
-                                      <div className="bg-emerald-100 p-3 rounded-2xl animate-pulse">
+                                      <div className="bg-emerald-100 p-3 rounded-2xl">
                                         <CheckCircle className="w-5 h-5 text-emerald-700" />
                                       </div>
                                       <div>
@@ -11820,7 +11869,7 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
                                   {/* Overall Audit Progress Bar */}
                                   <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-2">
                                     <div className="flex items-center justify-between text-xs font-bold">
-                                      <span className="text-slate-700 uppercase text-[10px] tracking-wider">Overall Upload Progress ({trackerSelectedTerm})</span>
+                                      <span className="text-slate-700 uppercase text-[10px] tracking-wider">Upload Progress for Class ({trackerSelectedTerm})</span>
                                       <span className="text-purple-700 font-black font-mono">{overallProgressPercentage}% Completed</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-250">
@@ -11833,8 +11882,17 @@ Account Number: ${MOCK_BANK_DETAILS.accountNumber}`;
 
                                   {/* Detailed Breakdown Grouped By Class */}
                                   <div className="grid grid-cols-1 gap-6">
-                                    {classesDb.map((cName) => {
-                                      const subjectsList = classSubjectsDb[cName] || [];
+                                    {classesToTrack.map((cName) => {
+                                      const subjectsList = (classSubjectsDb[cName] && classSubjectsDb[cName].length > 0)
+                                        ? classSubjectsDb[cName]
+                                        : (() => {
+                                            const stds = studentsDb.filter(s => s.grade === cName);
+                                            const uploadedSubjects = Array.from(new Set(stds.flatMap(s => {
+                                              const termData = s.termResults?.[trackerSelectedTerm];
+                                              return (termData?.subjects || []).map((sub: any) => sub.name);
+                                            })));
+                                            return uploadedSubjects.length > 0 ? uploadedSubjects : subjectsDb;
+                                          })();
                                       const enrolledStudents = studentsDb.filter(s => s.grade === cName);
                                       const formTeacher = teachersDb.find(t => t.formClass === cName);
 
